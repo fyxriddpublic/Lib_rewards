@@ -14,9 +14,9 @@ description:
 #################################
 #####         配置          #####
 #################################
-per: "rewards.admin"          #奖励管理权限
-usePer: "rewards.use"
-infoOtherPer: "rewards.infoOther"
+per: "lib.rewards.admin"     #奖励管理权限
+usePer: "lib.rewards.use"
+infoOtherPer: "lib.rewards.infoOther"
 
 tip: true                     #玩家上线如果有未领取奖励是否提示
 showRewards:                  #奖励显示(前4行显示奖励物品,后1行显示功能)
