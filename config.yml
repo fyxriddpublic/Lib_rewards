@@ -1,0 +1,55 @@
+﻿#功能:
+#>奖励
+#################################
+#####       语言文件        #####
+#################################
+#可以使用相对路径(是相对于服务端所在文件夹的路径)
+language: "plugins/Lib_rewards/language_cn.yml"
+#################################
+#####         描述          #####
+#################################
+description:
+  - "&7- 重新读取config.yml"
+  - "&7- 重新读取language.yml"
+#################################
+#####         配置          #####
+#################################
+per: "rewards.admin"          #奖励管理权限
+usePer: "rewards.use"
+infoOtherPer: "rewards.infoOther"
+
+tip: true                     #玩家上线如果有未领取奖励是否提示
+showRewards:                  #奖励显示(前4行显示奖励物品,后1行显示功能)
+  info:
+    pos: 0                    #界面中的位置
+    item: 340
+    smallId: 0
+    owner: "&6玩家: &3"
+    name: "&6奖励名: &5"
+    gold: "&6金币: &5"
+    exp: "&6经验: &5"
+    level: "&6等级: &5"
+    tip: "&6说明: &b"
+  pre:
+    pos: 2
+    item: 339
+    name: "&d前一页"
+    lore:
+  get:
+    pos: 4
+    item: 332
+    name: "&a获取奖励"
+    lore:
+  next:
+    pos: 6
+    item: 339
+    name: "&d后一页"
+    lore:
+  del:
+    pos: 8
+    item: 2258
+    name: "&4删除奖励"
+    lore:
+
+#奖励信息
+path: "plugins/Lib_rewards/rewards.yml"
