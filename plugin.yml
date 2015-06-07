@@ -1,5 +1,5 @@
 ﻿name: Lib_rewards
 main: lib.rewards.api.RewardsPlugin
-version: 1.0
+version: 1.1
 depend: [Lib_core, Lib_items, Lib_enchants, Lib_iconMenu]
 softdepend:

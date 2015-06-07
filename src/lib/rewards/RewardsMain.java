@@ -167,35 +167,17 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * data为'admin'时使用权限adminPer<br>
-     * data为null或其它时使用权限usePer
-     */
-    @Override
-    public void setOn(String name, String subFunc, boolean on) {
-        //数据
-        String per;
-        if (subFunc != null && subFunc.equalsIgnoreCase("admin")) per = adminPer;
-        else per = usePer;
-        //增减
-        if (on) PerApi.add(name, per);
-        else PerApi.del(name, per);
-    }
-
-    /**
      * 'a 目标玩家 奖励名' 请求删除目标玩家的奖励
      * 'b' 重新读取奖励配置
      * 'c 目标玩家 第几页' 查看目标玩家的奖励列表
      * 'd 目标玩家 插件 奖励类型[ 说明]' 给目标玩家添加奖励
      * 'e 目标玩家 钱 经验 等级[ 说明]' 给目标玩家发奖励(包括物品编辑器中的)
      * 'f 类型' 请求获取未领取的奖励
-     * @param p 操作的玩家,不为null
-     * @param data 操作的数据,可为null
      */
     @Override
-    public void onOperate(Player p, String data) {
-        if (data != null) {
+    public void onOperate(Player p, String... args) {
+        if (args.length > 0) {
             try {
-                String[] args = data.split(" ");
                 //不定长
                 if (args.length >= 4) {
                     if (args[0].equalsIgnoreCase("d")) {//给目标玩家添加奖励
@@ -267,8 +249,11 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                         }
                         break;
                 }
-            } catch (NumberFormatException e) {//输入格式异常
-                ShowApi.tip(p, get(699), true);
+            } catch (NumberFormatException e) {//数字格式异常
+                ShowApi.tip(p, get(10), true);
+                return;
+            } catch (Exception e) {//操作异常
+                ShowApi.tip(p, get(5), true);
                 return;
             }
         }

@@ -21,25 +21,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://H:/minecraft/Server1.8.3/plugins/!Lib_core_v1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
           <root url="jar://H:/minecraft/Server1.8.3/plugins/!Lib_iconMenu_v1.0.jar!/" />
-        </CLASSES>
-        <JAVADOC />
-        <SOURCES />
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library">
-      <library>
-        <CLASSES>
-          <root url="jar://H:/minecraft/Server1.8.3/plugins/!Lib_items_v1.0.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -54,6 +36,24 @@
         <SOURCES>
           <root url="file://$MODULE_DIR$/../!Lib_enchants/src" />
         </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://H:/minecraft/Server1.8.3/plugins/!Lib_core_v1.4.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library>
+        <CLASSES>
+          <root url="jar://H:/minecraft/Server1.8.3/plugins/!Lib_items_v1.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
       </library>
     </orderEntry>
   </component>
