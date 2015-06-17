@@ -1,18 +1,18 @@
-package lib.rewards;
+package com.fyxridd.lib.rewards;
 
-import lib.core.api.*;
-import lib.core.api.event.ReloadConfigEvent;
-import lib.core.api.inter.FancyMessage;
-import lib.core.api.inter.FunctionInterface;
-import lib.core.api.inter.TipTransaction;
-import lib.core.api.inter.TransactionUser;
-import lib.enchants.api.EnchantsApi;
-import lib.iconmenu.api.IconMenuApi;
-import lib.iconmenu.api.Info;
-import lib.iconmenu.api.OptionClickEvent;
-import lib.iconmenu.api.OptionClickEventHandler;
-import lib.items.api.ItemsApi;
-import lib.rewards.api.RewardsPlugin;
+import com.fyxridd.lib.core.api.*;
+import com.fyxridd.lib.core.api.event.ReloadConfigEvent;
+import com.fyxridd.lib.core.api.inter.FancyMessage;
+import com.fyxridd.lib.core.api.inter.FunctionInterface;
+import com.fyxridd.lib.core.api.inter.TipTransaction;
+import com.fyxridd.lib.core.api.inter.TransactionUser;
+import com.fyxridd.lib.enchants.api.EnchantsApi;
+import com.fyxridd.lib.iconmenu.api.IconMenuApi;
+import com.fyxridd.lib.iconmenu.api.Info;
+import com.fyxridd.lib.iconmenu.api.OptionClickEvent;
+import com.fyxridd.lib.iconmenu.api.OptionClickEventHandler;
+import com.fyxridd.lib.items.api.ItemsApi;
+import com.fyxridd.lib.rewards.api.RewardsPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
@@ -262,7 +262,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see lib.rewards.api.RewardsApi#reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
      */
     public static void reloadRewards(String plugin, YamlConfiguration config) {
         if (plugin == null || config == null) return;
@@ -325,7 +325,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
      */
     public static boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
         if (tar == null || money < 0 || exp < 0 || level < 0 || CoreApi.getRealName(null, tar) == null) return false;
@@ -362,7 +362,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean)
      */
     public static boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
         if (tar == null || type == null) return false;

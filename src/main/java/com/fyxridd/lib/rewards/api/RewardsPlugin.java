@@ -1,8 +1,8 @@
-package lib.rewards.api;
+package com.fyxridd.lib.rewards.api;
 
-import lib.core.api.CoreApi;
-import lib.core.api.FormatApi;
-import lib.rewards.RewardsMain;
+import com.fyxridd.lib.rewards.RewardsMain;
+import com.fyxridd.lib.core.api.CoreApi;
+import com.fyxridd.lib.core.api.FormatApi;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;

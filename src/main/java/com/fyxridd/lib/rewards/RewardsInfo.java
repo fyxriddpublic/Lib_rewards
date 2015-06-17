@@ -1,4 +1,4 @@
-package lib.rewards;
+package com.fyxridd.lib.rewards;
 
 public class RewardsInfo {
     String plugin;

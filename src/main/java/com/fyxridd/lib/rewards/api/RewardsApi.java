@@ -1,6 +1,6 @@
-package lib.rewards.api;
+package com.fyxridd.lib.rewards.api;
 
-import lib.rewards.RewardsMain;
+import com.fyxridd.lib.rewards.RewardsMain;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
