@@ -803,9 +803,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     private void initConfig() {
-        List<String> filter = ConfigApi.getDefaultFilter();
-        filter.add("rewards.yml");
-        ConfigApi.register(RewardsPlugin.file, RewardsPlugin.dataPath, filter, RewardsPlugin.pn, null);
+        ConfigApi.register(RewardsPlugin.file, RewardsPlugin.dataPath, RewardsPlugin.pn, null);
         ConfigApi.loadConfig(RewardsPlugin.pn);
     }
 
