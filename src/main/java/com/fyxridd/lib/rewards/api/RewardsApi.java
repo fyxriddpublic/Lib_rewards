@@ -4,9 +4,18 @@ import com.fyxridd.lib.rewards.RewardsMain;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
 import java.util.HashMap;
 
 public class RewardsApi {
+    /**
+     * @param file yml文件,可为null(null时无效果)
+     * @see #reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
+     */
+    public static void reloadRewards(String plugin, File file) {
+        RewardsMain.reloadRewards(plugin, file);
+    }
+
     /**
      * 重新读取奖励配置信息
      * @param plugin 插件,可为null(null时无效果)
