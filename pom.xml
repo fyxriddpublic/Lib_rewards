@@ -148,6 +148,27 @@
                             </resources>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>copy4</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${env.NBPVP_PLUGINS}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${basedir}/target</directory>
+                                    <includes>
+                                        <include>*.jar</include>
+                                    </includes>
+                                    <excludes>
+                                        <exclude>original-*.jar</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
