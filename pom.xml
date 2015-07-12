@@ -186,28 +186,28 @@
         <dependency>
             <groupId>com.fyxridd</groupId>
             <artifactId>Lib_core</artifactId>
-            <version>1.5.0</version>
+            <version>[1.0.0,)</version>
             <scope>provided</scope>
         </dependency>
         <!--Lib_iconMenu-->
         <dependency>
             <groupId>com.fyxridd</groupId>
             <artifactId>Lib_iconMenu</artifactId>
-            <version>1.1.0</version>
+            <version>[1.0.0,)</version>
             <scope>provided</scope>
         </dependency>
         <!--Lib_enchants-->
         <dependency>
             <groupId>com.fyxridd</groupId>
             <artifactId>Lib_enchants</artifactId>
-            <version>1.1.0</version>
+            <version>[1.0.0,)</version>
             <scope>provided</scope>
         </dependency>
         <!--Lib_items-->
         <dependency>
             <groupId>com.fyxridd</groupId>
             <artifactId>Lib_items</artifactId>
-            <version>1.2.0</version>
+            <version>[1.0.0,)</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
