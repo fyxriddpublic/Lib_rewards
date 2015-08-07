@@ -13,7 +13,7 @@ public class RewardsApi {
      * @see #reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
      */
     public static void reloadRewards(String plugin, File file) {
-        RewardsMain.reloadRewards(plugin, file);
+        RewardsMain.instance.reloadRewards(plugin, file);
     }
 
     /**
@@ -22,7 +22,7 @@ public class RewardsApi {
      * @param config 读取的奖励配置文件,可为null(null时无效果)
      */
     public static void reloadRewards(String plugin, YamlConfiguration config) {
-        RewardsMain.reloadRewards(plugin, config);
+        RewardsMain.instance.reloadRewards(plugin, config);
     }
 
     /**
@@ -39,7 +39,7 @@ public class RewardsApi {
      * @return 是否添加成功
      */
     public static boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
-        return RewardsMain.addRewards(plugin, type, tar, money, exp, level, tip, itemsHash, force);
+        return RewardsMain.instance.addRewards(plugin, type, tar, money, exp, level, tip, itemsHash, force);
     }
 
     /**
@@ -53,6 +53,6 @@ public class RewardsApi {
      * @return 是否添加成功
      */
     public static boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
-        return RewardsMain.addRewards(tar, plugin, type, show, tip, force);
+        return RewardsMain.instance.addRewards(tar, plugin, type, show, tip, force);
     }
 }

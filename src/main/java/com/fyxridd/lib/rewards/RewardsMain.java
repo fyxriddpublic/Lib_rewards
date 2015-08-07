@@ -39,6 +39,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
 
     private static Random r = new Random();
     private static String savePath;//保存文件夹的路径
+    public static RewardsMain instance;
 
     //配置
     private static String adminPer;
@@ -59,6 +60,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     private static HashMap<String, HashMap<String, RewardsUser>> userHash;
 
     public RewardsMain() {
+        instance = this;
         //初始化
         savePath = RewardsPlugin.dataPath+ File.separator+"rewards";
         new File(savePath).mkdirs();
@@ -264,7 +266,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     /**
      * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String, File)
      */
-    public static void reloadRewards(String plugin, File file) {
+    public void reloadRewards(String plugin, File file) {
         if (plugin == null || file == null) return;
         reloadRewards(plugin, CoreApi.loadConfigByUTF8(file));
     }
@@ -272,7 +274,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     /**
      * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
      */
-    public static void reloadRewards(String plugin, YamlConfiguration config) {
+    public void reloadRewards(String plugin, YamlConfiguration config) {
         if (plugin == null || config == null) return;
 
         rewardsHash.put(plugin, new HashMap<String, RewardsInfo>());
@@ -335,7 +337,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     /**
      * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
      */
-    public static boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
+    public boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
         if (tar == null || money < 0 || exp < 0 || level < 0 || CoreApi.getRealName(null, tar) == null) return false;
         //修正
         if (plugin == null) plugin = RewardsPlugin.pn;
@@ -372,7 +374,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     /**
      * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean)
      */
-    public static boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
+    public boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
         if (tar == null || type == null) return false;
         if (plugin == null) plugin = RewardsPlugin.pn;
         //目标玩家存在性检测
@@ -407,7 +409,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param type 类型,不为null
      * @return 奖励信息,没有返回null
      */
-    private static RewardsInfo getRewardsInfo(String plugin, String type) {
+    private RewardsInfo getRewardsInfo(String plugin, String type) {
         try {
             return rewardsHash.get(plugin).get(type);
         } catch (Exception e) {
@@ -422,7 +424,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param page 第几页,1-hash.size()
      * @return 是否查看成功
      */
-    private static boolean showList(Player p, String tar, int page) {
+    private boolean showList(Player p, String tar, int page) {
         //短期间隔
         if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return false;
         //目标玩家存在性检测
@@ -512,7 +514,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param level 等级,>=0
      * @param tip 说明,可为null
      */
-    private static void give(Player p, String tar, int money, int exp, int level, String tip) {
+    private void give(Player p, String tar, int money, int exp, int level, String tip) {
         //权限检测
         if (!PerApi.checkPer(p, adminPer)) return;
         //目标玩家存在性检测
@@ -553,7 +555,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param type 奖励类型,不为null
      */
     @SuppressWarnings("deprecation")
-    private static void get(Player p, String type) {
+    private void get(Player p, String type) {
         //短期间隔
         if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_LONG, 2)) return;
         String name = p.getName();
@@ -613,7 +615,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param type 奖励名,不为null
      * @return 是否移除成功
      */
-    private static boolean remove(String name, String type) {
+    private boolean remove(String name, String type) {
         if (!userHash.containsKey(name) || !userHash.get(name).containsKey(type)) return false;
         userHash.get(name).remove(type);
         try {
@@ -631,7 +633,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param tar 玩家名
      * @return 下一个未被使用的名字
      */
-    private static String getNextName(String plugin, String tar) {
+    private String getNextName(String plugin, String tar) {
         String path = savePath+File.separator+tar;
         int index = 1;
         while (new File(path+File.separator+plugin+"-"+index+".yml").exists()) index ++;
@@ -644,9 +646,9 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param hash hash
      * @return 出错返回null
      */
-    private static String getKey(Info info, HashMap<String, Info> hash) {
-        for (String key:hash.keySet()) {
-            if (hash.get(key).equals(info)) return key;
+    private String getKey(Info info, HashMap<String, Info> hash) {
+        for (Map.Entry<String, Info> entry:hash.entrySet()) {
+            if (entry.getValue().equals(info)) return entry.getKey();
         }
         return null;
     }
@@ -657,7 +659,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param hash hash
      * @return 出错返回null
      */
-    private static Info getInfo(int pos, HashMap<String, Info> hash) {
+    private Info getInfo(int pos, HashMap<String, Info> hash) {
         if (hash.size() <= 0) return null;
         if (pos < 0) pos = 0;
         if (pos >= hash.size()) pos = hash.size() -1;
@@ -671,7 +673,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param force 在已经有相同文件的情况下是否覆盖
      * @return 保存是否成功
      */
-    private static boolean save(RewardsUser rewardsUser, boolean force) {
+    private boolean save(RewardsUser rewardsUser, boolean force) {
         String savePath = RewardsMain.savePath+File.separator+rewardsUser.getName()+File.separator+rewardsUser.getType()+".yml";
         File saveFile = new File(savePath);
         saveFile.getParentFile().mkdirs();
@@ -698,7 +700,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param tar 查看的目标玩家
      * @param page 页面
      */
-    private static void delayShow(final Player p, final String tar, final int page) {
+    private void delayShow(final Player p, final String tar, final int page) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(RewardsPlugin.instance, new Runnable() {
             @Override
             public void run() {
@@ -712,7 +714,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param p 玩家
      * @param type 奖励类型
      */
-    private static void delayGet(final Player p, final String type) {
+    private void delayGet(final Player p, final String type) {
         Bukkit.getScheduler().scheduleSyncDelayedTask(RewardsPlugin.instance, new Runnable() {
             @Override
             public void run() {
@@ -725,7 +727,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * 读取所有的奖励数据
      * @return 是否读取成功
      */
-    private static boolean loadRewards() {
+    private boolean loadRewards() {
         //检测路径
         new File(savePath).mkdirs();
 
@@ -794,7 +796,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                     //设置新界面
                     String show = get(700, name).getText();
                     int size = 36;
-                    Info info = IconMenuApi.register(show, size, false, RewardsPlugin.rewardsMain);
+                    Info info = IconMenuApi.register(show, size, false, this);
                     for (int slot : itemsHash.keySet()) {
                         ItemStack is = itemsHash.get(slot);
                         info.setItem(slot, is);
@@ -815,7 +817,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         ConfigApi.loadConfig(RewardsPlugin.pn);
     }
 
-    private static void loadConfig() {
+    private void loadConfig() {
         YamlConfiguration config = ConfigApi.getConfig(RewardsPlugin.pn);
 
         adminPer = config.getString("per");
