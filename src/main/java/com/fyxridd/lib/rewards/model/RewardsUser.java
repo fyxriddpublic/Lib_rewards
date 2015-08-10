@@ -3,10 +3,11 @@ package com.fyxridd.lib.rewards.model;
 import com.fyxridd.lib.items.api.ItemsApi;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RewardsUser {
+public class RewardsUser implements Serializable{
     private String name;
     private String type;
 
