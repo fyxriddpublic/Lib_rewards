@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_6" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_7" inherit-compiler-output="false">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -12,7 +12,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd.lib:spigot:1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd:Lib_core:1.10.0" level="project" />
+    <orderEntry type="module" module-name="Lib_core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.json:json:20140107" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.15" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: javax.mail:mail:1.4.7" level="project" />
@@ -36,8 +36,8 @@
     <orderEntry type="library" scope="PROVIDED" name="Maven: mysql:mysql-connector-java:5.1.35" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.xerial:sqlite-jdbc:3.8.10.1" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd.lib:SqliteDialect:1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd:Lib_iconMenu:1.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd:Lib_enchants:1.1.0" level="project" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd:Lib_items:1.3.0" level="project" />
+    <orderEntry type="module" module-name="Lib_iconMenu" scope="PROVIDED" />
+    <orderEntry type="module" module-name="Lib_enchants" scope="PROVIDED" />
+    <orderEntry type="module" module-name="Lib_items" scope="PROVIDED" />
   </component>
 </module>

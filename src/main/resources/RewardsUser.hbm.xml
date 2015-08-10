@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+                                   "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+<hibernate-mapping package="com.fyxridd.lib.rewards.model">
+
+    <class name="RewardsUser" table="RewardsUser">
+        <composite-id>
+            <key-property name="name"/>
+            <key-property name="type"/>
+        </composite-id>
+        <property name="money" not-null="true"/>
+        <property name="exp" not-null="true"/>
+        <property name="level" not-null="true"/>
+        <property name="tip" not-null="true"/>
+        <property name="itemsData" not-null="true"></property>
+    </class>
+
+</hibernate-mapping>

@@ -1,5 +1,7 @@
 package com.fyxridd.lib.rewards.api;
 
+import com.fyxridd.lib.core.api.ConfigApi;
+import com.fyxridd.lib.core.api.CorePlugin;
 import com.fyxridd.lib.rewards.RewardsMain;
 import com.fyxridd.lib.core.api.CoreApi;
 import com.fyxridd.lib.core.api.FormatApi;
@@ -17,13 +19,22 @@ public class RewardsPlugin extends JavaPlugin{
     public static RewardsMain rewardsMain;
 
     @Override
-    public void onEnable() {
+    public void onLoad() {
         instance = this;
-        pn = getName();
         file = getFile();
-        dataPath = file.getParentFile().getAbsolutePath()+ File.separator+pn;
+        pn = getName();
+        dataPath = getDataFolder().getAbsolutePath();
         ver = CoreApi.getPluginVersion(file);
 
+        //生成文件
+        ConfigApi.generateFiles(file, pn);
+
+        //注册hbm
+        CorePlugin.registerHbm(new File(dataPath, "RewardsUser.hbm.xml"));
+    }
+
+    @Override
+    public void onEnable() {
         rewardsMain = new RewardsMain();
 
         //成功启动
@@ -32,6 +43,7 @@ public class RewardsPlugin extends JavaPlugin{
 
     @Override
     public void onDisable() {
+        RewardsMain.instance.onDisable();
         //显示插件成功停止信息
         CoreApi.sendConsoleMessage(FormatApi.get(pn, 30, pn, ver).getText());
     }

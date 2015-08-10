@@ -1,17 +1,29 @@
-package com.fyxridd.lib.rewards;
+package com.fyxridd.lib.rewards.model;
 
+import com.fyxridd.lib.items.api.ItemsApi;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class RewardsUser {
     private String name;
     private String type;
+
     private int money;
     private int exp;
     private int level;
     private String tip;
+    //可为空列表不为null
+    private HashMap<Integer, String> itemsData;
+
+    //临时,不保存到数据库
+
+    //可为空列表不为null
     private HashMap<Integer,ItemStack> itemsHash;
+
+    public RewardsUser(){}
+
     public RewardsUser(String name, String type, int money, int exp,
                        int level, String tip, HashMap<Integer, ItemStack> itemsHash) {
         super();
@@ -22,6 +34,7 @@ public class RewardsUser {
         this.level = level;
         this.tip = tip;
         this.itemsHash = itemsHash;
+        updateItems();
     }
 
     public String getName() {
@@ -72,11 +85,29 @@ public class RewardsUser {
         this.tip = tip;
     }
 
+    public HashMap<Integer, String> getItemsData() {
+        return itemsData;
+    }
+
+    public void setItemsData(HashMap<Integer, String> itemsData) {
+        this.itemsData = itemsData;
+    }
+
     public HashMap<Integer, ItemStack> getItemsHash() {
         return itemsHash;
     }
 
     public void setItemsHash(HashMap<Integer, ItemStack> itemsHash) {
         this.itemsHash = itemsHash;
+    }
+
+    /**
+     * 根据itemsHash更新itemsData
+     */
+    public void updateItems() {
+        this.itemsData = new HashMap<>();
+        for (Map.Entry<Integer, ItemStack> entry:itemsHash.entrySet()) {
+            itemsData.put(entry.getKey(), ItemsApi.saveItem(entry.getValue()));
+        }
     }
 }

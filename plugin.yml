@@ -1,5 +1,4 @@
 ﻿name: Lib_rewards
 main: com.fyxridd.lib.rewards.api.RewardsPlugin
-version: 1.2.0
+version: 1.3.0
 depend: [Lib_core, Lib_items, Lib_enchants, Lib_iconMenu]
-softdepend:

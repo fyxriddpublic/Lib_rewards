@@ -13,6 +13,7 @@ import com.fyxridd.lib.iconmenu.api.OptionClickEvent;
 import com.fyxridd.lib.iconmenu.api.OptionClickEventHandler;
 import com.fyxridd.lib.items.api.ItemsApi;
 import com.fyxridd.lib.rewards.api.RewardsPlugin;
+import com.fyxridd.lib.rewards.model.RewardsUser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;
@@ -31,64 +32,79 @@ import java.io.File;
 import java.util.*;
 
 public class RewardsMain implements Listener, FunctionInterface,OptionClickEventHandler {
+    //RewardsUser读取规则:
+    //玩家一加入游戏,就检测从数据库中读取所有的RewardsUser到缓存
+
     private static final String SHORT_DEFAULT = "re_default";
     private static final String SHORT_LONG = "re_long";
     private static final String FUNC_NAME = "Rewards";
 
     private static ItemMeta IM = new ItemStack(1).getItemMeta();
 
-    private static Random r = new Random();
-    private static String savePath;//保存文件夹的路径
     public static RewardsMain instance;
+    public static Dao dao;
 
     //配置
-    private static String adminPer;
-    private static String usePer;
-    private static String infoOtherPer;
-    private static boolean tipRewards;
-    private static ItemStack pre,get,next,del;
-    private static int infoPos, prePos, getPos, nextPos, delPos;
-    private static int infoItem, infoItemSmallId;
-    private static String infoOwner, infoName, infoGold, infoExp, infoLevel, infoTip;
+    private String adminPer;
+    private String usePer;
+    private String infoOtherPer;
+    private boolean tipRewards;
+    private ItemStack pre,get,next,del;
+    private int infoPos, prePos, getPos, nextPos, delPos;
+    private int infoItem, infoItemSmallId;
+    private String infoOwner, infoName, infoGold, infoExp, infoLevel, infoTip;
 
     //插件,类型,奖励信息
-    private static HashMap<String, HashMap<String, RewardsInfo>> rewardsHash = new HashMap<String, HashMap<String, RewardsInfo>>();
+    private HashMap<String, HashMap<String, RewardsInfo>> rewardsHash = new HashMap<>();
 
-    //玩家名,类型名,奖励页面(与userHash同步)
-    private static HashMap<String, HashMap<String, Info>> infoHash;
+    //缓存
+
+    //动态读取
     //玩家名,类型名,奖励
-    private static HashMap<String, HashMap<String, RewardsUser>> userHash;
+    private HashMap<String, HashMap<String, RewardsUser>> userHash = new HashMap<>();
+    //玩家名,类型名,奖励页面(与userHash同步)
+    private HashMap<String, HashMap<String, Info>> infoHash = new HashMap<>();
+
+    //需要更新的列表
+    private HashSet<RewardsUser> needUpdateList = new HashSet<>();
+    //需要删除的列表
+    private HashSet<RewardsUser> needDeleteList = new HashSet<>();
 
     public RewardsMain() {
         instance = this;
-        //初始化
-        savePath = RewardsPlugin.dataPath+ File.separator+"rewards";
-        new File(savePath).mkdirs();
         //初始化配置
         initConfig();
         //读取配置文件
         loadConfig();
-        //读取奖励
-        loadRewards();
+        dao = new Dao();
         //注册事件
         Bukkit.getPluginManager().registerEvents(this, RewardsPlugin.instance);
         //注册功能
         FuncApi.register(this);
+        //计时器: 更新
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(CorePlugin.instance, new Runnable() {
+            @Override
+            public void run() {
+                saveAll();
+            }
+        }, 436, 436);
+    }
+
+    public void onDisable() {
+        saveAll();
     }
 
     @EventHandler(priority= EventPriority.LOW)
     public void onReloadConfig(ReloadConfigEvent e) {
-        if (e.getPlugin().equals(RewardsPlugin.pn)) {
-            loadConfig();
-            loadRewards();
-        }
+        if (e.getPlugin().equals(RewardsPlugin.pn)) loadConfig();
     }
 
-    @EventHandler(priority=EventPriority.HIGHEST)
+    @EventHandler(priority=EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e) {
-        if (tipRewards && userHash.containsKey(e.getPlayer().getName()) && userHash.get(e.getPlayer().getName()).size() > 0) {
-            ShowApi.tip(e.getPlayer(), get(660), true);
-        }
+        //检测初始化
+        checkInit(e.getPlayer().getName());
+        //提示领取奖励
+        if (tipRewards && userHash.get(e.getPlayer().getName()).size() > 0) ShowApi.tip(e.getPlayer(), get(660), true);
     }
 
     @Override
@@ -133,10 +149,10 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                     //cmd
                     String cmd2 = "/f re a {tar} {type}";
                     //tip
-                    List<FancyMessage> tip = new ArrayList<FancyMessage>();
+                    List<FancyMessage> tip = new ArrayList<>();
                     tip.add(get(710));
                     //map
-                    HashMap<String, Object> map = new HashMap<String, Object>();
+                    HashMap<String, Object> map = new HashMap<>();
                     map.put("tar", tar);
                     map.put("type", type);
                     TipTransaction tipTransaction = TransactionApi.newTipTransaction(true, p.getName(), -1, -1, cmd2, tip, map, "type");
@@ -335,43 +351,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
-     */
-    public boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
-        if (tar == null || money < 0 || exp < 0 || level < 0 || CoreApi.getRealName(null, tar) == null) return false;
-        //修正
-        if (plugin == null) plugin = RewardsPlugin.pn;
-        if (money < 0) money = 0;
-        if (exp < 0) exp = 0;
-        if (level < 0) level = 0;
-        if (type == null) type = getNextName(plugin, tar);
-        if (tip == null) tip = get(645).getText();
-        if (itemsHash == null) itemsHash = new HashMap<Integer, ItemStack>();
-        //保存
-        RewardsUser rewardsInfo = new RewardsUser(tar, plugin+"-"+type, money, exp, level, tip, itemsHash);
-        if (!save(rewardsInfo, force)) return false;
-        //缓存
-        if (!userHash.containsKey(tar)) userHash.put(tar, new HashMap<String, RewardsUser>());
-        if (!infoHash.containsKey(tar)) infoHash.put(tar, new HashMap<String, Info>());
-        userHash.get(tar).put(plugin+"-"+type, rewardsInfo);
-        //info
-        String name = get(700, tar).getText();
-        int size = 36;
-        boolean emptyDestroy = false;
-        Info info = IconMenuApi.register(name, size, emptyDestroy, RewardsPlugin.rewardsMain);
-        infoHash.get(tar).put(plugin+"-"+type, info);
-        for (int slot : itemsHash.keySet()) {
-            if (slot >= 0 && slot < size) {
-                ItemStack is = itemsHash.get(slot);
-                info.setItem(slot, is);
-            }
-        }
-        //tip
-        CoreApi.sendMsg(tar, get(695), false);
-        return true;
-    }
-
-    /**
      * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean)
      */
     public boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
@@ -387,7 +366,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         HashMap<Integer, ItemStack> itemsHash;
         if (info.itemsPlugin == null) itemsHash = null;
         else {
-            itemsHash = new HashMap<Integer, ItemStack>();
+            itemsHash = new HashMap<>();
             List<ItemStack> itemsList = ItemsApi.getItems(info.itemsPlugin, info.itemsGetType);
             int index = 0;
             for (ItemStack is:itemsList) {
@@ -397,10 +376,46 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             }
         }
         return addRewards(plugin, show, tar,
-                r.nextInt(info.maxMoney-info.minMoney+1)+info.minMoney,
-                r.nextInt(info.maxExp-info.minExp+1)+info.minExp,
-                r.nextInt(info.maxLevel-info.minLevel+1)+info.minLevel,
+                CoreApi.Random.nextInt(info.maxMoney-info.minMoney+1)+info.minMoney,
+                CoreApi.Random.nextInt(info.maxExp-info.minExp+1)+info.minExp,
+                CoreApi.Random.nextInt(info.maxLevel-info.minLevel+1)+info.minLevel,
                 tip, itemsHash, force);
+    }
+
+    /**
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
+     */
+    public boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
+        if (tar == null || money < 0 || exp < 0 || level < 0 || CoreApi.getRealName(null, tar) == null) return false;
+        //修正
+        if (plugin == null) plugin = RewardsPlugin.pn;
+        if (money < 0) money = 0;
+        if (exp < 0) exp = 0;
+        if (level < 0) level = 0;
+        //type修正
+        if (type == null) type = getNextName(plugin, tar);
+        else type = plugin+"-"+type;
+        if (tip == null) tip = get(645).getText();
+        if (itemsHash == null) itemsHash = new HashMap<>();
+        //保存
+        RewardsUser rewardsUser = getRewardsUser(tar, type);
+        if (rewardsUser != null && !force) return false;
+        if (rewardsUser != null) {
+            rewardsUser.setMoney(money);
+            rewardsUser.setExp(exp);
+            rewardsUser.setLevel(level);
+            rewardsUser.setTip(tip);
+            rewardsUser.setItemsHash(itemsHash);
+            rewardsUser.updateItems();
+        }else rewardsUser = new RewardsUser(tar, type, money, exp, level, tip, itemsHash);
+        //添加缓存
+        addToHash(rewardsUser);
+        //添加更新
+        needDeleteList.remove(rewardsUser);
+        needUpdateList.add(rewardsUser);
+        //提示
+        CoreApi.sendMsg(tar, get(695), false);
+        return true;
     }
 
     /**
@@ -432,25 +447,23 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         if (tar == null) return false;
         //查看其它玩家奖励列表权限检测
         if (!p.getName().equals(tar) && !PerApi.checkPer(p, infoOtherPer)) return false;
+        //检测初始化
+        checkInit(tar);
         //目标玩家没有未获取的奖励列表
-        if (!infoHash.containsKey(tar)) {
+        HashMap<String, Info> infHash = infoHash.get(tar);
+        if (infHash.isEmpty()) {
             ShowApi.tip(p, get(655), true);
             return false;
         }
-        HashMap<String, Info> hash = infoHash.get(tar);
-        int maxPage = hash.size();
-        if(maxPage == 0) {
-            ShowApi.tip(p, get(655), true);
-            return false;
-        }
+        int maxPage = infHash.size();
         //页面检测
         if (page < 1 || page > maxPage) {
             ShowApi.tip(p, get(705, maxPage), true);
             return false;
         }
-        Info info = getInfo(page-1, hash);
+        Info info = getInfo(page-1, infHash);
         if (info != null) {
-            String type = getKey(info, hash);
+            String type = getKey(info, infHash);
             if (type == null) return false;//异常
             try {
                 RewardsUser ru = userHash.get(tar).get(type);
@@ -459,10 +472,10 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 Inventory inv = Bukkit.createInventory(p, 9, "none");
 
                 //提示物品
-                ItemStack infoItem = new ItemStack(RewardsMain.infoItem, page, (short)RewardsMain.infoItemSmallId);
+                ItemStack infoItem = new ItemStack(instance.infoItem, page, (short)instance.infoItemSmallId);
                 ItemMeta im = infoItem.getItemMeta();
                 im.setDisplayName(infoOwner+tar);
-                List<String> lore = new ArrayList<String>();
+                List<String> lore = new ArrayList<>();
                 lore.add(infoName+type);
                 lore.add(infoGold+ru.getMoney());
                 lore.add(infoExp+ru.getExp());
@@ -539,7 +552,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 }
             }
         }
-        HashMap<Integer, ItemStack> itemsHash = new HashMap<Integer, ItemStack>();
+        HashMap<Integer, ItemStack> itemsHash = new HashMap<>();
         for (int i=0;i<36;i++) {
             ItemStack is = result.getItem(i);
             if (is != null && !is.getType().equals(Material.AIR)) itemsHash.put(i, is);
@@ -554,17 +567,19 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param p 玩家,不为null
      * @param type 奖励类型,不为null
      */
-    @SuppressWarnings("deprecation")
     private void get(Player p, String type) {
         //短期间隔
         if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_LONG, 2)) return;
         String name = p.getName();
+        //检测初始化
+        checkInit(p.getName());
         //奖励类型不存在
-        if (!userHash.containsKey(name) || !userHash.get(name).containsKey(type)) {
+        HashMap<String, RewardsUser> rewardsHash = userHash.get(name);
+        RewardsUser rewardsInfo = rewardsHash.get(type);
+        if (rewardsInfo == null) {
             ShowApi.tip(p, get(635), true);
             return;
         }
-        RewardsUser rewardsInfo = userHash.get(name).get(type);
         int money = rewardsInfo.getMoney();
         int exp = rewardsInfo.getExp();
         int level = rewardsInfo.getLevel();
@@ -606,7 +621,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         //tip
         ShowApi.tip(p, get(640), true);
         //检测显示下个列表
-        if (userHash.containsKey(name) && userHash.get(name).size() > 0) delayShow(p, name, 1);
+        if (rewardsHash.size() > 0) delayShow(p, name, 1);
     }
 
     /**
@@ -616,14 +631,20 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @return 是否移除成功
      */
     private boolean remove(String name, String type) {
-        if (!userHash.containsKey(name) || !userHash.get(name).containsKey(type)) return false;
-        userHash.get(name).remove(type);
+        //检测初始化
+        checkInit(name);
+        //从缓存中删除
+        HashMap<String, RewardsUser> rewardsHash = userHash.get(name);
+        RewardsUser user = rewardsHash.remove(type);
+        if (user == null) return false;
         try {
             infoHash.get(name).remove(type);
         } catch (Exception e) {
             //do nothing
         }
-        new File(savePath+File.separator+name+File.separator+type+".yml").delete();
+        //添加更新
+        needDeleteList.add(user);
+        needUpdateList.remove(user);
         return true;
     }
 
@@ -631,13 +652,16 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * 获取下一个未被使用的名字
      * @param plugin 添加奖励的插件名
      * @param tar 玩家名
-     * @return 下一个未被使用的名字
+     * @return 下一个未被使用的名字(完全)
      */
     private String getNextName(String plugin, String tar) {
-        String path = savePath+File.separator+tar;
+        //检测初始化
+        checkInit(tar);
+        //获取
+        HashMap<String, RewardsUser> rewardsHash = userHash.get(tar);
         int index = 1;
-        while (new File(path+File.separator+plugin+"-"+index+".yml").exists()) index ++;
-        return String.valueOf(index);
+        while (rewardsHash.containsKey(plugin+"-"+index)) index ++;
+        return plugin+"-"+index;
     }
 
     /**
@@ -665,33 +689,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         if (pos >= hash.size()) pos = hash.size() -1;
         String key = (String) hash.keySet().toArray()[pos];
         return hash.get(key);
-    }
-
-    /**
-     * 保存指定的奖励数据
-     * @param rewardsUser 奖励信息,不为null
-     * @param force 在已经有相同文件的情况下是否覆盖
-     * @return 保存是否成功
-     */
-    private boolean save(RewardsUser rewardsUser, boolean force) {
-        String savePath = RewardsMain.savePath+File.separator+rewardsUser.getName()+File.separator+rewardsUser.getType()+".yml";
-        File saveFile = new File(savePath);
-        saveFile.getParentFile().mkdirs();
-
-        //是否强制保存
-        if (new File(savePath).exists() && !force) return false;
-
-        //设置config
-        YamlConfiguration config = new YamlConfiguration();
-        config.set("money", rewardsUser.getMoney());
-        config.set("exp", rewardsUser.getExp());
-        config.set("level", rewardsUser.getLevel());
-        config.set("tip", rewardsUser.getTip());
-        for (Map.Entry<Integer, ItemStack> entry:rewardsUser.getItemsHash().entrySet())
-            ItemsApi.saveItemStack(config, "items."+entry.getKey(), entry.getValue());
-
-        //保存
-        return CoreApi.saveConfigByUTF8(config, saveFile);
     }
 
     /**
@@ -724,92 +721,66 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * 读取所有的奖励数据
-     * @return 是否读取成功
+     * @return 可能为null
      */
-    private boolean loadRewards() {
-        //检测路径
-        new File(savePath).mkdirs();
+    private RewardsUser getRewardsUser(String name, String type) {
+        checkInit(name);
+        return userHash.get(name).get(type);
+    }
 
-        //重置缓存
-        userHash = new HashMap<String, HashMap<String,RewardsUser>>();
-        //注销所有旧界面
-        if (infoHash != null) {
-            for (String key:infoHash.keySet()) {
-                for (Info info:infoHash.get(key).values()) IconMenuApi.unregister(info);
+    /**
+     * 检测初始化玩家
+     */
+    private void checkInit(String name) {
+        if (!userHash.containsKey(name)) {
+            userHash.put(name, new HashMap<String, RewardsUser>());
+            infoHash.put(name, new HashMap<String, Info>());
+            //从数据库中读取玩家所有的RewardsUser
+            for (RewardsUser user:dao.getRewardsUsers(name)) addToHash(user);
+        }
+    }
+
+    /**
+     * 添加RewardsUser到缓存
+     * 同时更新Info
+     */
+    private void addToHash(RewardsUser rewardsUser) {
+        //初始化
+        HashMap<String, RewardsUser> rewardsHash = userHash.get(rewardsUser.getName());
+        if (rewardsHash == null) {
+            rewardsHash = new HashMap<>();
+            userHash.put(rewardsUser.getName(), rewardsHash);
+        }
+        HashMap<String, Info> infHash = infoHash.get(rewardsUser.getName());
+        if (infHash == null) {
+            infHash = new HashMap<>();
+            infoHash.put(rewardsUser.getName(), infHash);
+        }
+        //添加
+        rewardsHash.put(rewardsUser.getType(), rewardsUser);
+        Info info = IconMenuApi.register(get(700, rewardsUser.getName()).getText(), 36, false, instance);
+        infHash.put(rewardsUser.getType(), info);
+        for (Map.Entry<Integer, ItemStack> entry: rewardsUser.getItemsHash().entrySet()) {
+            if (entry.getKey() >= 0 && entry.getKey() < 36) {
+                info.setItem(entry.getKey(), entry.getValue());
             }
         }
-        infoHash = new HashMap<String, HashMap<String,Info>>();
+    }
 
-        //读取
-        File[] nameFileList = new File(savePath).listFiles();
-        if (nameFileList == null) return false;
-
-        //需要删除的空文件夹
-        List<File> delList = new ArrayList<File>();
-
-        for (File file : nameFileList) {
-            //非文件夹
-            if (!file.isDirectory()) {
-                delList.add(file);
-                continue;
-            }
-
-            //无奖励文件
-            String name = file.getName();
-            File[] fileList = new File(savePath + File.separator + name).listFiles();
-            if (fileList == null || fileList.length == 0) {
-                delList.add(file);
-                continue;
-            }
-
-            if (!userHash.containsKey(name)) userHash.put(name, new HashMap<String, RewardsUser>());
-            if (!infoHash.containsKey(name)) infoHash.put(name, new HashMap<String, Info>());
-
-            for (File file2 : fileList) {
-                if (file2.isFile() && file2.getName().endsWith(".yml")) {
-                    YamlConfiguration config = CoreApi.loadConfigByUTF8(file2);
-                    if (config == null) {//玩家的某个奖励读取错误
-                        ConfigApi.log(RewardsPlugin.pn, "load Rewards data error: "+name+" "+file2.getName());
-                        continue;
-                    }
-
-                    //load
-                    String s = file2.getName().substring(0, file2.getName().length() - 4);
-                    int money = config.getInt("money");
-                    int exp = config.getInt("exp");
-                    int level = config.getInt("level");
-                    String tip = CoreApi.convert(config.getString("tip", get(645).getText()));
-                    //item
-                    HashMap<Integer, ItemStack> itemsHash = new HashMap<Integer, ItemStack>();
-                    for (int i = 0; i < 36; i++) {
-                        if (config.contains("items." + i)) {
-                            MemorySection ms = (MemorySection) config.get("items."+i);
-                            ItemStack is = ItemsApi.loadItemStack(ms);
-                            if (is != null) itemsHash.put(i, is);
-                        }
-                    }
-                    //添加奖励数据
-                    RewardsUser rewardsInfo = new RewardsUser(name, s, money, exp, level, tip, itemsHash);
-                    userHash.get(name).put(s, rewardsInfo);
-
-                    //设置新界面
-                    String show = get(700, name).getText();
-                    int size = 36;
-                    Info info = IconMenuApi.register(show, size, false, this);
-                    for (int slot : itemsHash.keySet()) {
-                        ItemStack is = itemsHash.get(slot);
-                        info.setItem(slot, is);
-                    }
-                    infoHash.get(name).put(s, info);
-                }
-            }
+    /**
+     * 更新
+     */
+    private void saveAll() {
+        //保存
+        if (!needUpdateList.isEmpty()) {
+            RewardsMain.dao.saveOrUpdates(needUpdateList);
+            needUpdateList.clear();
         }
-
-        //删除空文件夹
-        for (File f:delList) f.delete();
-
-        return true;
+        //删除
+        if (!needDeleteList.isEmpty()) {
+            RewardsMain.dao.deletes(needDeleteList);
+            needDeleteList.clear();
+        }
     }
 
     private void initConfig() {
