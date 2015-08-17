@@ -736,7 +736,16 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             userHash.put(name, new HashMap<String, RewardsUser>());
             infoHash.put(name, new HashMap<String, Info>());
             //从数据库中读取玩家所有的RewardsUser
-            for (RewardsUser user:dao.getRewardsUsers(name)) addToHash(user);
+            for (RewardsUser user:dao.getRewardsUsers(name)) {
+                //解析
+                HashMap<Integer, ItemStack> itemHash = new HashMap<>();
+                for (Map.Entry<Integer, String> entry:user.getItemsData().entrySet()) {
+                    itemHash.put(entry.getKey(), ItemsApi.loadItem(entry.getValue()));
+                }
+                user.setItemsHash(itemHash);
+                //添加到缓存
+                addToHash(user);
+            }
         }
     }
 
