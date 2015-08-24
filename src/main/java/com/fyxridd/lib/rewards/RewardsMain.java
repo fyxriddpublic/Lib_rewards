@@ -296,15 +296,37 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         if (map != null) {
             for (String type : map.keySet()) {
                 MemorySection ms = (MemorySection) config.get(type);
+                String str;
                 //minMoney,maxMoney
-                int minMoney = Integer.parseInt(ms.getString("money").split("\\-")[0]);
-                int maxMoney = Integer.parseInt(ms.getString("money").split("\\-")[1]);
+                int minMoney, maxMoney;
+                str = ms.getString("money");
+                if (str == null || str.isEmpty()) {
+                    minMoney = 0;
+                    maxMoney = 0;
+                }else {
+                    minMoney = Integer.parseInt(str.split("\\-")[0]);
+                    maxMoney = Integer.parseInt(str.split("\\-")[1]);
+                }
                 //minExp,maxExp
-                int minExp = Integer.parseInt(ms.getString("exp").split("\\-")[0]);
-                int maxExp = Integer.parseInt(ms.getString("exp").split("\\-")[1]);
+                int minExp, maxExp;
+                str = ms.getString("exp");
+                if (str == null || str.isEmpty()) {
+                    minExp = 0;
+                    maxExp = 0;
+                }else {
+                    minExp = Integer.parseInt(str.split("\\-")[0]);
+                    maxExp = Integer.parseInt(str.split("\\-")[1]);
+                }
                 //minLevel,maxLevel
-                int minLevel = Integer.parseInt(ms.getString("level").split("\\-")[0]);
-                int maxLevel = Integer.parseInt(ms.getString("level").split("\\-")[1]);
+                int minLevel, maxLevel;
+                str = ms.getString("level");
+                if (str == null || str.isEmpty()) {
+                    minLevel = 0;
+                    maxLevel = 0;
+                }else {
+                    minLevel = Integer.parseInt(str.split("\\-")[0]);
+                    maxLevel = Integer.parseInt(str.split("\\-")[1]);
+                }
                 //items
                 String s = ms.getString("itemsType");
                 String itemsPlugin = null, itemsGetType = null;
