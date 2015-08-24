@@ -188,7 +188,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * 'a 目标玩家 奖励名' 请求删除目标玩家的奖励
      * 'b' 重新读取奖励配置
      * 'c 目标玩家 第几页' 查看目标玩家的奖励列表
-     * 'd 目标玩家 插件 奖励类型[ 说明]' 给目标玩家添加奖励
+     * 'd 目标玩家 插件 奖励类型' 给目标玩家添加奖励
      * 'e 目标玩家 钱 经验 等级[ 说明]' 给目标玩家发奖励(包括物品编辑器中的)
      * 'f 类型' 请求获取未领取的奖励
      */
@@ -197,33 +197,16 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         if (args.length > 0) {
             try {
                 //不定长
-                if (args.length >= 4) {
-                    if (args[0].equalsIgnoreCase("d")) {//给目标玩家添加奖励
-                        //权限检测
-                        if (!PerApi.checkPer(p, adminPer)) return;
+                if (args.length >= 5) {
+                    if (args[0].equalsIgnoreCase("e")) {//给目标玩家发奖励(包括物品编辑器中的)
                         //短期间隔
                         if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
 
                         String tip;
-                        if (args.length == 4) tip = null;
-                        else tip = CoreApi.combine(args, " ", 4, args.length);
-                        if (addRewards(args[1], args[2], args[3], null, tip, true, false))
-                            ShowApi.tip(p, get(685), true);
-                        else
-                            ShowApi.tip(p, get(690), true);
+                        if (args.length == 5) tip = "";
+                        else tip = CoreApi.combine(args, " ", 5, args.length);
+                        give(p, args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), tip);
                         return;
-                    }
-                    if (args.length >= 5) {
-                        if (args[0].equalsIgnoreCase("e")) {//给目标玩家发奖励(包括物品编辑器中的)
-                            //短期间隔
-                            if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
-
-                            String tip;
-                            if (args.length == 5) tip = "";
-                            else tip = CoreApi.combine(args, " ", 5, args.length);
-                            give(p, args[1], Integer.parseInt(args[2]), Integer.parseInt(args[3]), Integer.parseInt(args[4]), tip);
-                            return;
-                        }
                     }
                 }
                 //定长
@@ -263,6 +246,20 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                             return;
                         } else if (args[0].equalsIgnoreCase("c")) {//查看目标玩家的奖励列表
                             showList(p, args[1], Integer.parseInt(args[2]));
+                            return;
+                        }
+                        break;
+                    case 4:
+                        if (args[0].equalsIgnoreCase("d")) {//给目标玩家添加奖励
+                            //权限检测
+                            if (!PerApi.checkPer(p, adminPer)) return;
+                            //短期间隔
+                            if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
+
+                            if (addRewards(args[1], args[2], args[3], null, true, false))
+                                ShowApi.tip(p, get(685), true);
+                            else
+                                ShowApi.tip(p, get(690), true);
                             return;
                         }
                         break;
@@ -351,9 +348,9 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean, boolean)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, boolean, boolean)
      */
-    public boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force, boolean direct) {
+    public boolean addRewards(String tar, String plugin, String type, String show, boolean force, boolean direct) {
         if (tar == null || type == null) return false;
         if (plugin == null) plugin = RewardsPlugin.pn;
         //目标玩家存在性检测
@@ -379,7 +376,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 CoreApi.Random.nextInt(info.maxMoney-info.minMoney+1)+info.minMoney,
                 CoreApi.Random.nextInt(info.maxExp-info.minExp+1)+info.minExp,
                 CoreApi.Random.nextInt(info.maxLevel-info.minLevel+1)+info.minLevel,
-                tip, itemsHash, force, direct);
+                info.tip, itemsHash, force, direct);
     }
 
     /**

@@ -49,12 +49,11 @@ public class RewardsApi {
      * @param plugin 插件名,可为null,null时使用rewards插件名
      * @param type 奖励名,可为null(null时返回false)
      * @param show 奖励显示名,null表示名字随意(注意:不能使用数字作类型名,因为数字已被预留)
-     * @param tip 奖励提示,可为null
      * @param force 在show不为null的情况下如果已经有此类型奖励未领取是否强制覆盖原来的奖励
      * @param direct 是否直接添加到背包,true时先尝试添加到背包,添加不了的再放到奖励列表;false时添加到奖励列表
      * @return 是否添加成功
      */
-    public static boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force, boolean direct) {
-        return RewardsMain.instance.addRewards(tar, plugin, type, show, tip, force, direct);
+    public static boolean addRewards(String tar, String plugin, String type, String show, boolean force, boolean direct) {
+        return RewardsMain.instance.addRewards(tar, plugin, type, show, force, direct);
     }
 }
