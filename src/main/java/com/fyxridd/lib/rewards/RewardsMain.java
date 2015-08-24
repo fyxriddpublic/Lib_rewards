@@ -207,7 +207,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                         String tip;
                         if (args.length == 4) tip = null;
                         else tip = CoreApi.combine(args, " ", 4, args.length);
-                        if (addRewards(args[1], args[2], args[3], null, tip, true))
+                        if (addRewards(args[1], args[2], args[3], null, tip, true, false))
                             ShowApi.tip(p, get(685), true);
                         else
                             ShowApi.tip(p, get(690), true);
@@ -351,9 +351,9 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, String, String, boolean, boolean)
      */
-    public boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force) {
+    public boolean addRewards(String tar, String plugin, String type, String show, String tip, boolean force, boolean direct) {
         if (tar == null || type == null) return false;
         if (plugin == null) plugin = RewardsPlugin.pn;
         //目标玩家存在性检测
@@ -379,24 +379,62 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 CoreApi.Random.nextInt(info.maxMoney-info.minMoney+1)+info.minMoney,
                 CoreApi.Random.nextInt(info.maxExp-info.minExp+1)+info.minExp,
                 CoreApi.Random.nextInt(info.maxLevel-info.minLevel+1)+info.minLevel,
-                tip, itemsHash, force);
+                tip, itemsHash, force, direct);
     }
 
     /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#addRewards(String, String, String, int, int, int, String, java.util.HashMap, boolean, boolean)
      */
-    public boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force) {
+    public boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force, boolean direct) {
         if (tar == null || money < 0 || exp < 0 || level < 0 || CoreApi.getRealName(null, tar) == null) return false;
         //修正
         if (plugin == null) plugin = RewardsPlugin.pn;
         if (money < 0) money = 0;
         if (exp < 0) exp = 0;
         if (level < 0) level = 0;
+        if (itemsHash == null) itemsHash = new HashMap<>();
+        //直接添加到背包
+        if (direct && !itemsHash.isEmpty()) {
+            final Player tarP = Bukkit.getPlayerExact(tar);
+            if (tarP != null && !tarP.isDead()) {
+                PlayerInventory pi = tarP.getInventory();
+                Iterator<Map.Entry<Integer, ItemStack>> it = itemsHash.entrySet().iterator();
+                while (it.hasNext()) {
+                    Map.Entry<Integer, ItemStack> entry = it.next();
+                    ItemStack check = pi.getItem(entry.getKey());
+                    if (check == null || check.getType().equals(Material.AIR)) {//是空气,直接设置
+                        pi.setItem(entry.getKey(), entry.getValue());
+                        it.remove();
+                    }else {//非空气,直接添加到背包
+                        HashMap<Integer, ItemStack> result = pi.addItem(entry.getValue());
+                        it.remove();
+                        if (!result.isEmpty()) {//表示背包满了
+                            int index = -1;
+                            for (ItemStack is:result.values()) {
+                                if (!itemsHash.containsKey(++index)) itemsHash.put(index, is);
+                            }
+                            break;
+                        }
+                    }
+                }
+                //延时更新背包
+                Bukkit.getScheduler().scheduleSyncDelayedTask(RewardsPlugin.instance, new Runnable() {
+                    @Override
+                    public void run() {
+                        if (tarP.isOnline() && !tarP.isDead()) tarP.updateInventory();
+                    }
+                });
+            }
+        }
+        //检测奖励是否为空
+        if (money <= 0 && exp <= 0 && level <= 0 && itemsHash.isEmpty()) {
+            CoreApi.sendMsg(tar, get(80), false);
+            return true;
+        }
         //type修正
         if (type == null) type = getNextName(plugin, tar);
         else type = plugin+"-"+type;
         if (tip == null) tip = get(645).getText();
-        if (itemsHash == null) itemsHash = new HashMap<>();
         //保存
         RewardsUser rewardsUser = getRewardsUser(tar, type);
         if (rewardsUser != null && !force) return false;
@@ -558,7 +596,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             if (is != null && !is.getType().equals(Material.AIR)) itemsHash.put(i, is);
         }
         //添加
-        if (addRewards(RewardsPlugin.pn, null, tar, money, exp, level, tip, itemsHash , true)) ShowApi.tip(p, get(685), true);
+        if (addRewards(RewardsPlugin.pn, null, tar, money, exp, level, tip, itemsHash , true, false)) ShowApi.tip(p, get(685), true);
         else ShowApi.tip(p, get(690), true);
     }
 
