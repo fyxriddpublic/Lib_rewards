@@ -659,12 +659,12 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         }
         //exp
         if (exp > 0) {
-            p.setTotalExperience(p.getTotalExperience()+exp);
+            p.giveExp(exp);
             ShowApi.tip(p, get(60, exp), true);
         }
         //level
         if (level > 0) {
-            p.setLevel(p.getLevel()+level);
+            p.giveExpLevels(level);
             ShowApi.tip(p, get(65, level), true);
         }
         //item
