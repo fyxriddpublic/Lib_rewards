@@ -11,7 +11,7 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd.lib:spigot:1.0" level="project" />
+    <orderEntry type="library" scope="PROVIDED" name="Maven: com.fyxridd.lib:spigot:1.8.8" level="project" />
     <orderEntry type="module" module-name="Lib_core" scope="PROVIDED" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.json:json:20140107" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.yaml:snakeyaml:1.15" level="project" />
