@@ -1,4 +1,4 @@
-package com.fyxridd.lib.rewards.model;
+package com.fyxridd.lib.rewards.api.model;
 
 import com.fyxridd.lib.items.api.ItemsApi;
 import org.bukkit.inventory.ItemStack;

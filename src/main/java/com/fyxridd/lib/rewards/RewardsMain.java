@@ -13,7 +13,7 @@ import com.fyxridd.lib.iconmenu.api.OptionClickEvent;
 import com.fyxridd.lib.iconmenu.api.OptionClickEventHandler;
 import com.fyxridd.lib.items.api.ItemsApi;
 import com.fyxridd.lib.rewards.api.RewardsPlugin;
-import com.fyxridd.lib.rewards.model.RewardsUser;
+import com.fyxridd.lib.rewards.api.model.RewardsUser;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.MemorySection;

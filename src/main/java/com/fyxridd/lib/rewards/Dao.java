@@ -1,7 +1,7 @@
 package com.fyxridd.lib.rewards;
 
 import com.fyxridd.lib.core.api.CorePlugin;
-import com.fyxridd.lib.rewards.model.RewardsUser;
+import com.fyxridd.lib.rewards.api.model.RewardsUser;
 import org.bukkit.event.Listener;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
