@@ -35,8 +35,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     //RewardsUser读取规则:
     //玩家一加入游戏,就检测从数据库中读取所有的RewardsUser到缓存
 
-    private static final String SHORT_DEFAULT = "re_default";
-    private static final String SHORT_LONG = "re_long";
     private static final String FUNC_NAME = "Rewards";
 
     private static ItemMeta IM = new ItemStack(1).getItemMeta();
@@ -199,9 +197,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 //不定长
                 if (args.length >= 5) {
                     if (args[0].equalsIgnoreCase("e")) {//给目标玩家发奖励(包括物品编辑器中的)
-                        //短期间隔
-                        if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
-
                         String tip;
                         if (args.length == 5) tip = "";
                         else tip = CoreApi.combine(args, " ", 5, args.length);
@@ -215,9 +210,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                         if (args[0].equalsIgnoreCase("b")) {//重新读取奖励配置
                             //权限检测
                             if (!PerApi.checkPer(p, adminPer)) return;
-                            //短期间隔
-                            if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
-
                             loadConfig();
                             ShowApi.tip(p, get(698), true);
                             return;
@@ -233,8 +225,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                         if (args[0].equalsIgnoreCase("a")) {//请求删除目标玩家的奖励
                             //权限检测
                             if (!PerApi.checkPer(p, adminPer)) return;
-                            //短期间隔
-                            if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
                             //目标玩家存在性检测
                             String tar = args[1];
                             tar = CoreApi.getRealName(p, tar);
@@ -253,8 +243,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                         if (args[0].equalsIgnoreCase("d")) {//给目标玩家添加奖励
                             //权限检测
                             if (!PerApi.checkPer(p, adminPer)) return;
-                            //短期间隔
-                            if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return;
 
                             if (addRewards(args[1], args[2], args[3], null, true, false))
                                 ShowApi.tip(p, get(685), true);
@@ -497,8 +485,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @return 是否查看成功
      */
     private boolean showList(Player p, String tar, int page) {
-        //短期间隔
-        if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_DEFAULT, 2)) return false;
         //目标玩家存在性检测
         tar = CoreApi.getRealName(p, tar);
         if (tar == null) return false;
@@ -625,8 +611,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * @param type 奖励类型,不为null
      */
     private void get(Player p, String type) {
-        //短期间隔
-        if (!SpeedApi.checkShort(p, RewardsPlugin.pn, SHORT_LONG, 2)) return;
         String name = p.getName();
         //检测初始化
         checkInit(p.getName());
