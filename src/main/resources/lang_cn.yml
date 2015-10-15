@@ -36,23 +36,13 @@ show-699: "&c输入格式异常."
 show-700: "&1&l玩家&5&l{0}&1&l的奖励列表:"
 show-705: "&c页面只能在1-{0}之间."
 
-show-710: "&e删除玩家<0>&e的奖励<1>  <2>  <3>"
+show-710: "&e确认删除玩家'&3{tar}&e'的奖励'&d{type}&e'吗?  <0>  <1>"
 info-710:
   0:
-    text: " {tar} "
-    color: "d"
-    formats: "n"
-    onClick: "cmd /f tm b tar"
-  1:
-    text: " {type} "
-    color: "d"
-    formats: "n"
-    onClick: "cmd /f tm b type"
-  2:
     text: "[确认]"
     color: "a"
     onClick: "cmd /f tm a"
-  3:
+  1:
     text: "[取消]"
     color: "7"
     onClick: "cmd /f tm c"

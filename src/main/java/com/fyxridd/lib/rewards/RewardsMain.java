@@ -4,8 +4,6 @@ import com.fyxridd.lib.core.api.*;
 import com.fyxridd.lib.core.api.event.ReloadConfigEvent;
 import com.fyxridd.lib.core.api.inter.FancyMessage;
 import com.fyxridd.lib.core.api.inter.FunctionInterface;
-import com.fyxridd.lib.core.api.inter.TipTransaction;
-import com.fyxridd.lib.core.api.inter.TransactionUser;
 import com.fyxridd.lib.enchants.api.EnchantsApi;
 import com.fyxridd.lib.iconmenu.api.IconMenuApi;
 import com.fyxridd.lib.iconmenu.api.Info;
@@ -138,27 +136,10 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                     delayShow(p, tar, page);
                     e.setWillClose(true);
                 }else if (cmd == delPos) {
-                    Player p = e.getP();
-                    Inventory inv = info.getInv(p);
-                    int size = info.getInv().getSize();
-                    ItemStack infoItem = inv.getItem(size);
+                    ItemStack infoItem = info.getInv(e.getP()).getItem(info.getInv().getSize());
                     String tar = infoItem.getItemMeta().getDisplayName().substring(infoOwner.length());
                     String type = infoItem.getItemMeta().getLore().get(0).substring(infoName.length());
-                    //cmd
-                    String cmd2 = "/f re a {tar} {type}";
-                    //tip
-                    List<FancyMessage> tip = new ArrayList<>();
-                    tip.add(get(710));
-                    //map
-                    HashMap<String, Object> map = new HashMap<>();
-                    map.put("tar", tar);
-                    map.put("type", type);
-                    TipTransaction tipTransaction = TransactionApi.newTipTransaction(true, p.getName(), -1, -1, cmd2, tip, map, "type");
-                    TransactionUser tu = TransactionApi.getTransactionUser(p.getName());
-                    tu.addTransaction(tipTransaction);
-                    tu.setRunning(tipTransaction.getId());
-                    tipTransaction.updateShow();
-                    //
+                    e.getP().chat("/f tp Lib_rewards del "+tar+" "+type);
                     e.setWillClose(true);
                 }
             }
@@ -945,6 +926,8 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             return;
         }
         reloadRewards(RewardsPlugin.pn, saveConfig);
+        //重新读取提示
+        TransactionApi.reloadTips(RewardsPlugin.pn, new File(RewardsPlugin.dataPath, "tips.yml"));
     }
 
     private static FancyMessage get(int id, Object... args) {

@@ -1,0 +1,9 @@
+#配置变量: '目标玩家 奖励类型'
+del:
+  instant: true
+  params:
+    tar: "3 {1}"
+    type: "3 {2}"
+  tips:
+    - "710"
+  cmd: "/f re a {tar} {type}"
