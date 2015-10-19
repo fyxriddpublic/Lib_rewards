@@ -927,7 +927,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         }
         reloadRewards(RewardsPlugin.pn, saveConfig);
         //重新读取提示
-        TransactionApi.reloadTips(RewardsPlugin.pn, new File(RewardsPlugin.dataPath, "tips.yml"));
+        TransactionApi.reloadTips(RewardsPlugin.pn);
     }
 
     private static FancyMessage get(int id, Object... args) {
