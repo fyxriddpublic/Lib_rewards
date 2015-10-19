@@ -815,7 +815,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     private void initConfig() {
-        ConfigApi.register(RewardsPlugin.file, RewardsPlugin.dataPath, RewardsPlugin.pn, null);
+        ConfigApi.register(RewardsPlugin.file, RewardsPlugin.dataPath, RewardsPlugin.pn);
         ConfigApi.loadConfig(RewardsPlugin.pn);
     }
 
