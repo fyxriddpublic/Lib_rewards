@@ -246,16 +246,18 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     }
 
     /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String, File)
+     * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String)
      */
+    public void reloadRewards(String plugin) {
+        if (plugin == null) return;
+        reloadRewards(plugin, new File(new File(CoreApi.pluginPath, plugin), "rewards.yml"));
+    }
+
     public void reloadRewards(String plugin, File file) {
         if (plugin == null || file == null) return;
         reloadRewards(plugin, CoreApi.loadConfigByUTF8(file));
     }
 
-    /**
-     * @see com.fyxridd.lib.rewards.api.RewardsApi#reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
-     */
     public void reloadRewards(String plugin, YamlConfiguration config) {
         if (plugin == null || config == null) return;
 

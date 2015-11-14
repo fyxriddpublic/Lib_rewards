@@ -1,28 +1,17 @@
 package com.fyxridd.lib.rewards.api;
 
 import com.fyxridd.lib.rewards.RewardsMain;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.util.HashMap;
 
 public class RewardsApi {
     /**
-     * @param file yml文件,可为null(null时无效果)
-     * @see #reloadRewards(String, org.bukkit.configuration.file.YamlConfiguration)
-     */
-    public static void reloadRewards(String plugin, File file) {
-        RewardsMain.instance.reloadRewards(plugin, file);
-    }
-
-    /**
      * 重新读取奖励配置信息
-     * @param plugin 插件,可为null(null时无效果)
-     * @param config 读取的奖励配置文件,可为null(null时无效果)
+     * 会读取插件数据文件夹下rewards.yml文件
      */
-    public static void reloadRewards(String plugin, YamlConfiguration config) {
-        RewardsMain.instance.reloadRewards(plugin, config);
+    public static void reloadRewards(String plugin) {
+        RewardsMain.instance.reloadRewards(plugin);
     }
 
     /**
