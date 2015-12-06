@@ -35,8 +35,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
 
     private static final String FUNC_NAME = "Rewards";
 
-    private static ItemMeta IM = new ItemStack(1).getItemMeta();
-
     public static RewardsMain instance;
     public static Dao dao;
 
@@ -64,7 +62,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
     //需要更新的列表
     private HashSet<RewardsUser> needUpdateList = new HashSet<>();
     //需要删除的列表
-    private HashSet<RewardsUser> needDeleteList = new HashSet<>();
+    private HashMap<String, HashSet<RewardsUser>> needDeleteList = new HashMap<>();
 
     public RewardsMain() {
         instance = this;
@@ -435,11 +433,18 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             rewardsUser.setTip(tip);
             rewardsUser.setItemsHash(itemsHash);
             rewardsUser.updateItems();
-        }else rewardsUser = new RewardsUser(tar, type, money, exp, level, tip, itemsHash);
+        }else {
+            if (isInDelList(tar, type)) saveAll();//防不同对象同时在删除列表里的bug
+            rewardsUser = new RewardsUser(tar, type, money, exp, level, tip, itemsHash);
+        }
         //添加缓存
         addToHash(rewardsUser);
         //添加更新
-        needDeleteList.remove(rewardsUser);
+        HashSet<RewardsUser> dels = needDeleteList.get(tar);
+        if (dels != null) {
+            dels.remove(rewardsUser);
+            if (dels.isEmpty()) needDeleteList.remove(tar);
+        }
         needUpdateList.add(rewardsUser);
         //提示
         CoreApi.sendMsg(tar, get(695), false);
@@ -667,7 +672,12 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             //do nothing
         }
         //添加更新
-        needDeleteList.add(user);
+        HashSet<RewardsUser> dels = needDeleteList.get(name);
+        if (dels == null) {
+            dels = new HashSet<>();
+            needDeleteList.put(name, dels);
+        }
+        dels.add(user);
         needUpdateList.remove(user);
         return true;
     }
@@ -684,8 +694,23 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         //获取
         HashMap<String, RewardsUser> rewardsHash = userHash.get(tar);
         int index = 1;
-        while (rewardsHash.containsKey(plugin+"-"+index)) index ++;
+        while (rewardsHash.containsKey(plugin+"-"+index) || isInDelList(tar, plugin+"-"+index)) index ++;
         return plugin+"-"+index;
+    }
+
+    /**
+     * 检测是否在删除列表里
+     * @param name 玩家名
+     * @param type 类型
+     */
+    private boolean isInDelList(String name, String type) {
+        HashSet<RewardsUser> dels = needDeleteList.get(name);
+        if (dels != null) {
+            for (RewardsUser user:dels) {
+                if (user.getName().equals(name) && user.getType().equals(type)) return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -804,15 +829,15 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
      * 更新
      */
     private void saveAll() {
-        //保存
-        if (!needUpdateList.isEmpty()) {
-            RewardsMain.dao.saveOrUpdates(needUpdateList);
-            needUpdateList.clear();
-        }
         //删除
         if (!needDeleteList.isEmpty()) {
             RewardsMain.dao.deletes(needDeleteList);
             needDeleteList.clear();
+        }
+        //保存
+        if (!needUpdateList.isEmpty()) {
+            RewardsMain.dao.saveOrUpdates(needUpdateList);
+            needUpdateList.clear();
         }
     }
 
@@ -849,7 +874,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         lore = config.getStringList("showRewards.pre.lore");
         for (int i=0;i<lore.size();i++) lore.set(i, CoreApi.convert(lore.get(i)));
         pre = new ItemStack(id, 1, (short)smallId);
-        im = IM.clone();
+        im = CoreApi.EmptyIm.clone();
         im.setDisplayName(name);
         im.setLore(lore);
         pre.setItemMeta(im);
@@ -867,7 +892,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         lore = config.getStringList("showRewards.get.lore");
         for (int i=0;i<lore.size();i++) lore.set(i, CoreApi.convert(lore.get(i)));
         get = new ItemStack(id, 1, (short)smallId);
-        im = IM.clone();
+        im = CoreApi.EmptyIm.clone();
         im.setDisplayName(name);
         im.setLore(lore);
         get.setItemMeta(im);
@@ -885,7 +910,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         lore = config.getStringList("showRewards.next.lore");
         for (int i=0;i<lore.size();i++) lore.set(i, CoreApi.convert(lore.get(i)));
         next = new ItemStack(id, 1, (short)smallId);
-        im = IM.clone();
+        im = CoreApi.EmptyIm.clone();
         im.setDisplayName(name);
         im.setLore(lore);
         next.setItemMeta(im);
@@ -903,7 +928,7 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         lore = config.getStringList("showRewards.del.lore");
         for (int i=0;i<lore.size();i++) lore.set(i, CoreApi.convert(lore.get(i)));
         del = new ItemStack(id, 1, (short)smallId);
-        im = IM.clone();
+        im = CoreApi.EmptyIm.clone();
         im.setDisplayName(name);
         im.setLore(lore);
         del.setItemMeta(im);

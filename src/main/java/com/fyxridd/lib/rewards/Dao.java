@@ -7,6 +7,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class Dao implements Listener {
@@ -27,11 +29,13 @@ public class Dao implements Listener {
         }
     }
 
-    public void deletes(Collection c) {
+    public void deletes(HashMap<String, HashSet<RewardsUser>> list) {
         Session session = sessionFactory.openSession();
         try {
             session.beginTransaction();
-            for (Object o:c) session.delete(o);
+            for (HashSet<RewardsUser> dels:list.values()) {
+                for (RewardsUser user:dels) session.delete(user);
+            }
             session.getTransaction().commit();
         } finally {
             session.close();
