@@ -381,44 +381,52 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
         if (exp < 0) exp = 0;
         if (level < 0) level = 0;
         if (itemsHash == null) itemsHash = new HashMap<>();
-        //直接添加到背包
-        if (direct && !itemsHash.isEmpty()) {
-            final Player tarP = Bukkit.getPlayerExact(tar);
-            if (tarP != null && !tarP.isDead()) {
-                PlayerInventory pi = tarP.getInventory();
-                Iterator<Map.Entry<Integer, ItemStack>> it = itemsHash.entrySet().iterator();
-                while (it.hasNext()) {
-                    Map.Entry<Integer, ItemStack> entry = it.next();
-                    ItemStack check = pi.getItem(entry.getKey());
-                    if (check == null || check.getType().equals(Material.AIR)) {//是空气,直接设置
-                        pi.setItem(entry.getKey(), entry.getValue());
-                        it.remove();
-                    }else {//非空气,直接添加到背包
-                        HashMap<Integer, ItemStack> result = pi.addItem(entry.getValue());
-                        it.remove();
-                        if (!result.isEmpty()) {//表示背包满了
-                            int index = -1;
-                            for (ItemStack is:result.values()) {
-                                if (!itemsHash.containsKey(++index)) itemsHash.put(index, is);
-                            }
-                            break;
-                        }
-                    }
-                }
-                //延时更新背包
-                Bukkit.getScheduler().scheduleSyncDelayedTask(RewardsPlugin.instance, new Runnable() {
-                    @Override
-                    public void run() {
-                        if (tarP.isOnline() && !tarP.isDead()) tarP.updateInventory();
-                    }
-                });
-            }
-        }
         //检测奖励是否为空
         if (money <= 0 && exp <= 0 && level <= 0 && itemsHash.isEmpty()) {
             CoreApi.sendMsg(tar, get(80), false);
             return true;
         }
+        //直接添加
+        if (direct) {
+            final Player tarP = Bukkit.getPlayerExact(tar);
+            if (tarP != null && !tarP.isDead()) {
+                //背包空格检测
+                PlayerInventory pi = tarP.getInventory();
+                if (ItemApi.getEmptySlots(pi) >= itemsHash.size()) {//背包空格足够
+                    //退出界面
+                    ShowApi.exit(tarP, false);
+                    //money
+                    if (money > 0) {
+                        EcoApi.add(tarP.getName(), money);
+                        ShowApi.tip(tarP, get(55, money), false);
+                    }
+                    //exp
+                    if (exp > 0) {
+                        tarP.giveExp(exp);
+                        ShowApi.tip(tarP, get(60, exp), false);
+                    }
+                    //level
+                    if (level > 0) {
+                        tarP.giveExpLevels(level);
+                        ShowApi.tip(tarP, get(65, level), false);
+                    }
+                    //item
+                    for (int i:itemsHash.keySet()) {
+                        ItemStack is = itemsHash.get(i);
+                        pi.addItem(is);
+                        ShowApi.tip(tarP, get(70, is.getAmount(), NamesApi.getItemName(is)), false);
+                    }
+                    //延时更新背包
+                    CoreApi.updateInventoryDelay(tarP);
+                    //提示
+                    ShowApi.tip(tarP, get(640), false);
+                    return true;
+                }
+                //背包空格不够,添加到奖励列表
+                ShowApi.tip(tarP, get(90), true);
+            }
+        }
+
         //type修正
         if (type == null) type = getNextName(plugin, tar);
         else type = plugin+"-"+type;
@@ -622,33 +630,35 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
             return;
         }
         //成功
+        //退出界面
+        ShowApi.exit(p, false);
         //删除
         remove(name, type);
         //money
         if (money > 0) {
             EcoApi.add(p.getName(), money);
-            ShowApi.tip(p, get(55, money), true);
+            ShowApi.tip(p, get(55, money), false);
         }
         //exp
         if (exp > 0) {
             p.giveExp(exp);
-            ShowApi.tip(p, get(60, exp), true);
+            ShowApi.tip(p, get(60, exp), false);
         }
         //level
         if (level > 0) {
             p.giveExpLevels(level);
-            ShowApi.tip(p, get(65, level), true);
+            ShowApi.tip(p, get(65, level), false);
         }
         //item
         for (int i:itemsHash.keySet()) {
             ItemStack is = itemsHash.get(i);
             inv.addItem(is);
-            ShowApi.tip(p, get(70, is.getAmount(), NamesApi.getItemName(is)), true);
+            ShowApi.tip(p, get(70, is.getAmount(), NamesApi.getItemName(is)), false);
         }
         //更新背包
         p.updateInventory();
         //tip
-        ShowApi.tip(p, get(640), true);
+        ShowApi.tip(p, get(640), false);
         //检测显示下个列表
         if (rewardsHash.size() > 0) delayShow(p, name, 1);
     }

@@ -25,7 +25,7 @@ public class RewardsApi {
      * @param tip 奖励说明,可为null
      * @param itemsHash 物品,可为null
      * @param force 在type不为null的情况下如果已经有此类型奖励未领取是否强制覆盖原来的奖励
-     * @param direct 是否直接添加到背包,true时先尝试添加到背包,添加不了的再放到奖励列表;false时添加到奖励列表
+     * @param direct 是否直接添加,true时如果背包空间足够则直接添加所有奖励,其它情况则添加到奖励列表
      * @return 是否添加成功
      */
     public static boolean addRewards(String plugin, String type, String tar, int money, int exp, int level, String tip, HashMap<Integer, ItemStack> itemsHash, boolean force, boolean direct) {
