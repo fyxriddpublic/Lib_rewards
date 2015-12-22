@@ -393,8 +393,6 @@ public class RewardsMain implements Listener, FunctionInterface,OptionClickEvent
                 //背包空格检测
                 PlayerInventory pi = tarP.getInventory();
                 if (ItemApi.getEmptySlots(pi) >= itemsHash.size()) {//背包空格足够
-                    //退出界面
-                    ShowApi.exit(tarP, false);
                     //money
                     if (money > 0) {
                         EcoApi.add(tarP.getName(), money);
